@@ -86,6 +86,21 @@ writeFileSync(
 )
 
 mkdirSync(distDir, { recursive: true })
+const shouldPublish = process.argv.includes('--publish')
+if (shouldPublish) {
+  // Publish from the staged copy so the registry tarball carries `integrity.json`
+  // exactly as it was hashed above. `--no-git-checks` avoids pnpm demanding a
+  // clean tree/tag inside the staging folder.
+  execFileSync(
+    process.execPath,
+    [pnpmPath, 'publish', '--access', 'public', '--no-git-checks', '--ignore-scripts'],
+    { cwd: stage, stdio: 'inherit' },
+  )
+  rmSync(stage, { recursive: true, force: true })
+  console.log(`published ${pkg.name}@${pkg.version} to the configured registry`)
+  process.exit(0)
+}
+
 execFileSync(process.execPath, [pnpmPath, 'pack'], { cwd: stage, stdio: 'inherit' })
 
 const tarball = readdirSync(stage).find((name) => name.endsWith('.tgz'))

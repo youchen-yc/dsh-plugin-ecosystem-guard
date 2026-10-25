@@ -93,15 +93,28 @@
 
 ## 安装
 
+三种方式，装的是同一份代码：
+
 ```powershell
-# 在 DSH 里让 agent 调用 plugin_manager 安装本地目录：
-#   action: install_bundle, target: <本目录绝对路径>
+# 1) 从 npm（推荐，一条命令，永远是最新发行版）
+#    plugin_manager action=install_bundle target=dsh-plugin-ecosystem-guard
+
+# 2) 从 Gitee 发行版下载 tgz 后装本地文件
+#    plugin_manager action=install_bundle target=<tgz 绝对路径>
+
+# 3) 从 Git 仓库直接装
+#    plugin_manager action=install_bundle target=git+https://gitee.com/youchen-yc/dsh-plugin-ecosystem-guard.git
 ```
+
+- npm：<https://www.npmjs.com/package/dsh-plugin-ecosystem-guard>
+- 源码与发行版：<https://gitee.com/youchen-yc/dsh-plugin-ecosystem-guard>
+
+要求 Node ≥ 20、DSH ≥ 0.2.1-rc.1，零运行时依赖。
 
 安装后：
 
 1. 工具 `plugin_guard` 出现在当前会话（`action=scan` 即可验收）；
-2. 设置 → 插件 → 「插件守护」出现独立页面；
+2. 设置 → 插件 → 「插件生态守护」出现独立页面；
 3. 若 `client` 半未能随包加载，Host 工具与自检仍然可用（Host 侧对客户端通道的加载是惰性的、失败不影响其它功能）。
 
 ## 安全模型（写进底层逻辑，不只是文档）
@@ -163,11 +176,13 @@
 
 | 方式 | 说明 |
 |---|---|
-| tgz | `dist/dsh-plugin-ecosystem-guard-1.0.0.tgz`（已含 `integrity.json`）；别人 `plugin_manager action=install_bundle target=<该 tgz 路径>` 即可 |
-| git | `install_bundle target=git+https://…` |
-| npm | 包名 `dsh-plugin-ecosystem-guard` 已确认未被占用；`private` 已移除；还差 `repository`/`homepage`（需要你的仓库地址，不编造） |
+| **npm（已发布）** | <https://www.npmjs.com/package/dsh-plugin-ecosystem-guard> · `install_bundle target=dsh-plugin-ecosystem-guard` |
+| Gitee 发行版 | <https://gitee.com/youchen-yc/dsh-plugin-ecosystem-guard/releases> · 下载 `dsh-plugin-ecosystem-guard-1.0.0.tgz` |
+| 本地 tgz | `dist/dsh-plugin-ecosystem-guard-1.0.0.tgz`（已含 `integrity.json`） |
+| git | `install_bundle target=git+https://gitee.com/youchen-yc/dsh-plugin-ecosystem-guard.git` |
 
 构建：`node scripts/build.mjs <pnpm.mjs 路径>` —— 复制 `files` 白名单 → 生成 `integrity.json` → 打包到 `dist/`。
+发布：`node scripts/build.mjs <pnpm.mjs 路径> --publish` —— 从同一份带清单的构建目录上传到 npm（需要本机 `~/.npmrc` 里有发布令牌）。
 
 ## 已知边界
 
