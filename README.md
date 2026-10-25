@@ -177,8 +177,8 @@
 | 方式 | 说明 |
 |---|---|
 | **npm（已发布）** | <https://www.npmjs.com/package/dsh-plugin-ecosystem-guard> · `install_bundle target=dsh-plugin-ecosystem-guard` |
-| Gitee 发行版 | <https://gitee.com/youchen-yc/dsh-plugin-ecosystem-guard/releases> · 下载 `dsh-plugin-ecosystem-guard-1.0.0.tgz` |
-| 本地 tgz | `dist/dsh-plugin-ecosystem-guard-1.0.0.tgz`（已含 `integrity.json`） |
+| Gitee 发行版 | <https://gitee.com/youchen-yc/dsh-plugin-ecosystem-guard/releases> · 下载对应版本的 `.tgz` |
+| 本地 tgz | `dist/dsh-plugin-ecosystem-guard-<版本>.tgz`（已含 `integrity.json`） |
 | git | `install_bundle target=git+https://gitee.com/youchen-yc/dsh-plugin-ecosystem-guard.git` |
 
 构建：`node scripts/build.mjs <pnpm.mjs 路径>` —— 复制 `files` 白名单 → 生成 `integrity.json` → 打包到 `dist/`。
