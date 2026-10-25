@@ -1,16 +1,17 @@
 /**
  * dsh-plugin-ecosystem-guard — Client half.
  *
- * Registers one page into Settings → Plugins (`settings.plugins.tab`) and talks
- * to the Host half over the package's private Connection RPC channel
- * `/ecosystem-guard` (see lib/client-rpc.js for the Host side and the evidence that
- * this is the supported seam for a persistent bundle on this build).
+ * Registers one page as its own Settings section (`settings.section`, the same
+ * seat 「插件市场」 and 「会话修复」 occupy) and talks to the Host half over the
+ * package's private Connection RPC channel `/ecosystem-guard` (see
+ * lib/client-rpc.js for the Host side and the evidence that this is the
+ * supported seam for a persistent bundle on this build).
  *
- * Registration contract (mirrors the shipped @deepseek-ai/dsh-client-ui-settings-plugin-inventory
- * client, which occupies the same slot):
+ * Registration contract (mirrors the installed dsh-workspace-mover rescue
+ * section, which occupies the same slot):
  *
- *   ctx.slots.inject('settings.plugins.tab', () => ctx.slots.register({
- *     name: 'settings.plugins.tab', id, order, label: () => t(...), locale, inject
+ *   ctx.slots.inject('settings.section', () => ctx.slots.register({
+ *     name: 'settings.section', id, order, label: () => t(...), inject
  *   }, Page))
  *
  * The entry receives `t` (bound to the `locale` namespace), every field returned
@@ -1199,6 +1200,9 @@ window.__ModuleLoader__.load({
         renderResult(result),
       )
 
+      // Order matters for usability: the health summary and the action buttons
+      // sit at the TOP, so 修复/重置/升级/调试 are reachable without scrolling
+      // past the (potentially long) findings list and capability table.
       return h(
         'div',
         { className: 'pg-section', 'aria-busy': busy || phase === 'loading' ? 'true' : 'false' },
@@ -1207,9 +1211,9 @@ window.__ModuleLoader__.load({
         retryRow,
         loadingCard,
         chips,
+        actionsPanel,
         findingsPanel,
         capabilitiesPanel,
-        actionsPanel,
       )
     }
 
@@ -1270,14 +1274,16 @@ window.__ModuleLoader__.load({
 
       try {
         if (ctx && ctx.slots && typeof ctx.slots.inject === 'function' && typeof ctx.slots.register === 'function') {
-          ctx.slots.inject('settings.plugins.tab', () =>
+          // A whole Settings *section* — its own row in the settings nav, the same
+          // seat 「插件市场」 and 「会话修复」 use. A tab nested inside 内置插件 was
+          // technically correct but effectively undiscoverable.
+          ctx.slots.inject('settings.section', () =>
             ctx.slots.register(
               {
-                name: 'settings.plugins.tab',
+                name: 'settings.section',
                 id: 'ecosystem-guard',
-                order: 70,
+                order: 45,
                 label: () => t('title'),
-                locale: NS,
                 inject: () => ({ rpc: rpcApi, t, locale }),
               },
               Page,
