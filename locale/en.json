@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Ecosystem Guard",
+    "description": "Audits installed plugins for load failures, bundle errors, shared-module mounts, likely duplicate function and self-degradation; pre-checks every plugin install for conflicts and incompatibility; brokers other plugins' tools only after the user confirms; repair, reset, upgrade and debug always ask first. Read-only by default: no file writes, no network, no prompt injection."
+  }
+}

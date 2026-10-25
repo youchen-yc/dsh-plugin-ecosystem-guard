@@ -1,0 +1,13 @@
+# dependencies (none today, but pnpm/npm may create it later)
+node_modules/
+
+# build output: the tarball and its staging dir are produced by scripts/build.mjs
+dist/
+dist/.stage/
+
+# logs / editor noise
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

@@ -1,0 +1,16 @@
+# dsh-plugin-ecosystem-guard bundle patch
+#
+# One row, one package. The config below is the documented default; a user patch
+# layer can override any field and that override survives upgrades.
+- insert:
+    - id: ecosystem-guard
+      name: 'dsh-plugin-ecosystem-guard'
+      config:
+        installPolicy: ask
+        invokeRequireConfirmation: true
+        confirmDestructive: true
+        confirmDebug: true
+        invokeBlocklist:
+          - plugin_guard
+          - plugin_manager
+          - run_code

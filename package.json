@@ -1,0 +1,63 @@
+{
+  "name": "dsh-plugin-ecosystem-guard",
+  "version": "1.0.0",
+  "description": "Plugin ecosystem guard for DeepSeek Harness: audits installed plugins for load failures, incompatibility and duplicate function, pre-checks every plugin install before it runs, brokers other plugins' tools only behind explicit user confirmation, and performs repair/reset/upgrade/debug only after the user agrees. Read-only by default: no file writes, no network.",
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "lib/*.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "CONTRACT.md",
+    "README.md",
+    "README.en.md",
+    "LICENSE",
+    "integrity.json"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-settings-plugins",
+        "@deepseek-ai/dsh-client-connection"
+      ]
+    }
+  },
+  "engines": {
+    "node": ">=20",
+    "dsh": ">=0.2.1-rc.1"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "cordis",
+    "plugin-guard",
+    "plugin-conflict",
+    "plugin-incompatibility",
+    "self-check",
+    "plugin-ecosystem"
+  ],
+  "author": "游尘 (YC)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitee.com/youchen-yc/dsh-plugin-ecosystem-guard.git"
+  },
+  "homepage": "https://gitee.com/youchen-yc/dsh-plugin-ecosystem-guard#readme",
+  "bugs": {
+    "url": "https://gitee.com/youchen-yc/dsh-plugin-ecosystem-guard/issues"
+  }
+}
