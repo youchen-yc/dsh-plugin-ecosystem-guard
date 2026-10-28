@@ -1,5 +1,7 @@
 # dsh-plugin-ecosystem-guard · 插件生态守护
 
+> **⚠️ 安全公告：1.0.3 之前的版本存在安全缺陷，请不要下载或使用；请升级到 1.0.3 或更高版本。**
+
 一个 DSH（DeepSeek Harness）持久插件包：体检插件生态、安装前预检冲突、在用户同意后代调用其他插件的能力，并对自检发现的问题做**经用户确认**的修复、重置、升级与调试。
 
 - 包名：`dsh-plugin-ecosystem-guard` · bundle 行 id：`ecosystem-guard` · 客户端模块 id：`dsh-plugin-ecosystem-guard`
