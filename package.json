@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-ecosystem-guard",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Plugin ecosystem guard for DeepSeek Harness: audits installed plugins for load failures, incompatibility and duplicate function, pre-checks every plugin install before it runs, brokers other plugins' tools only behind explicit user confirmation, and performs repair/reset/upgrade/debug only after the user agrees. Read-only by default: no file writes, no network.",
   "type": "module",
   "exports": {
@@ -19,8 +19,9 @@
     "CONTRACT.md",
     "README.md",
     "README.en.md",
-    "LICENSE",
-    "integrity.json"
+    "SECURITY.md",
+    "docs/security/*.md",
+    "LICENSE"
   ],
   "dsh": {
     "bundle": {

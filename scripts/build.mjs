@@ -69,6 +69,14 @@ for (const pattern of pkg.files || []) {
 // package.json while producing the tarball (field normalisation), so a digest
 // taken from the staging copy would never match the packed file.
 copyFileSync(join(root, 'package.json'), join(stage, 'package.json'))
+// The checkout's `files` list deliberately does not name `integrity.json` — that
+// file only exists while building (a source tree must not claim files it does not
+// carry). Add it to the *staged* manifest so the packer keeps the generated file.
+const stagedPkg = JSON.parse(readFileSync(join(stage, 'package.json'), 'utf8'))
+const stagedFiles = Array.isArray(stagedPkg.files) ? stagedPkg.files.slice() : []
+if (!stagedFiles.includes('integrity.json')) stagedFiles.push('integrity.json')
+stagedPkg.files = stagedFiles
+writeFileSync(join(stage, 'package.json'), `${JSON.stringify(stagedPkg, null, 2)}\n`)
 
 const files = {}
 for (const relative of shipped) {

@@ -37,6 +37,7 @@ import {
   summarizeAnalysis,
 } from './lib/doctor.js'
 import { checkIntegritySync, isBlocked } from './lib/integrity.js'
+import { isKnownAction, isKnownRpcMethod, rpcNeedsConfirmation } from './lib/policy.js'
 import { createActions } from './lib/actions.js'
 
 export const name = 'ecosystem-guard'
@@ -495,6 +496,10 @@ export function apply(ctx, rawConfig = {}) {
     timeoutMs: 900000,
     async execute(args = {}, exec = {}) {
       const action = String(args.action || '').trim()
+      // Default deny before any work: the action whitelist lives in lib/policy.js.
+      if (!isKnownAction(action)) {
+        return jsonSafe({ ok: false, action, error: { code: 'unknown-action', message: `未知 action：${action}` } })
+      }
       if (blocked) return jsonSafe(integrityFailure(action))
       try {
         return jsonSafe(await run(action, args, exec))
@@ -787,11 +792,16 @@ export function apply(ctx, rawConfig = {}) {
   async function dispatch(method, args, signal) {
     const label = String(method ?? '')
     const payload = args && typeof args === 'object' ? args : {}
+    // Default deny: an unregistered method is refused before anything else runs.
+    // The whitelist lives in lib/policy.js (single source of truth) and is covered
+    // by test/security.test.mjs.
+    if (!isKnownRpcMethod(label)) {
+      return { ok: false, error: { code: 'unknown-method', message: `未知方法：${label}` } }
+    }
     // While integrity is failed the page may still read status (so the banner can
     // explain why), but no operation is performed.
     if (blocked && label !== 'guard.status') return integrityFailure(label)
-    const requireConfirmation = ['guard.repair', 'guard.reset', 'guard.upgrade', 'guard.debug']
-    if (requireConfirmation.includes(label) && payload.confirmed !== true) {
+    if (rpcNeedsConfirmation(label) && payload.confirmed !== true) {
       return { ok: false, error: { code: 'confirmation-required', message: '该操作需要用户在界面中明确确认' } }
     }
     try {

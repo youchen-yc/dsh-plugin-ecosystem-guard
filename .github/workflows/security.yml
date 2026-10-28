@@ -1,0 +1,89 @@
+# 安全门禁（F-02 依赖漏洞扫描 / I-03 静态与密钥扫描 / F-04 SBOM / F-03 产物签名）
+#
+# 每次 push 与 PR 都跑；任何一步失败，发布门禁不通过（分支保护里把本工作流设为必需检查）。
+name: security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 语法检查（全部运行文件）
+        run: |
+          for f in index.js client.js lib/*.js scripts/*.mjs test/*.mjs; do
+            node --check "$f"
+          done
+
+      - name: 依赖漏洞扫描（零运行时依赖也要跑，防回归）
+        run: |
+          if [ -f package-lock.json ]; then npm audit --omit=dev --audit-level=high; else
+            echo "no dependencies declared — nothing to audit"
+          fi
+
+      - name: 密钥泄露扫描（源码与文档）
+        run: |
+          set -e
+          # 常见凭证形态：AWS key、私钥头、npm token、GitHub token、Slack token
+          if git grep -nE '(AKIA[0-9A-Z]{16}|-----BEGIN (RSA |OPENSSH |EC |PGP )?PRIVATE KEY-----|npm_[A-Za-z0-9]{30,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[baprs]-[A-Za-z0-9-]{10,})' \
+              -- . ':!docs/security/release-signing.pub.pem' ':!test/security.test.mjs'; then
+            echo "::error::detected a committed credential"
+            exit 1
+          fi
+          echo "secret scan clean"
+
+      - name: 危险 API 扫描（运行时文件）
+        run: |
+          set -e
+          if grep -nE '\beval\s*\(|new Function\s*\(|child_process|dangerouslySetInnerHTML|\.innerHTML\s*=' \
+              index.js client.js lib/*.js; then
+            echo "::error::forbidden API in runtime files"
+            exit 1
+          fi
+          echo "dangerous-api scan clean"
+
+      - name: 单元与安全不变量测试
+        run: node --test test/selftest.mjs test/actions.test.mjs test/integrity.test.mjs test/security.test.mjs
+
+      - name: 构建（含完整性清单）
+        run: |
+          npm i -g pnpm@11
+          node scripts/build.mjs "$(command -v pnpm)" || node scripts/build.mjs "$(which pnpm)"
+
+      - name: 干净环境安装自检（解包 → 入口可加载 → 完整性 ok）
+        run: |
+          mkdir -p /tmp/clean && tar -xzf dist/*.tar.gz -C /tmp/clean
+          node scripts/clean-install-check.mjs /tmp/clean/package
+
+      - name: 产物签名自验证 + SBOM
+        run: node scripts/release-evidence.mjs
+
+      - name: 签名复核（用提交的公钥独立验证）
+        run: |
+          for artifact in dist/*.tar.gz; do
+            node scripts/verify-release.mjs "$artifact" "$artifact.sig" docs/security/release-signing.pub.pem
+          done
+
+      - name: 归档证据
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-evidence
+          path: |
+            dist/*.tar.gz
+            dist/*.sig
+            dist/SBOM.cdx.json
+            dist/RELEASE-EVIDENCE.md
+            dist/VERIFICATION.md
