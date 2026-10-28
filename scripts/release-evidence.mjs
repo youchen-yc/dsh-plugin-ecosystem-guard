@@ -11,7 +11,7 @@
  *   省略参数时，取 dist/ 下与 package.json 版本一致的 .tar.gz / .tgz。
  */
 
-import { createHash, generateKeyPairSync, sign, verify } from 'node:crypto'
+import { createHash, generateKeyPairSync, randomUUID, sign, verify } from 'node:crypto'
 import {
   existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync,
 } from 'node:fs'
@@ -60,7 +60,7 @@ function buildSbom(artifacts) {
   return {
     bomFormat: 'CycloneDX',
     specVersion: '1.5',
-    serialNumber: `urn:uuid:${createHash('sha256').update(`${pkg.name}@${pkg.version}`).digest('hex').slice(0, 8)}-0000-4000-8000-000000000000`,
+    serialNumber: `urn:uuid:${randomUUID()}`,
     version: 1,
     metadata: {
       timestamp: new Date().toISOString(),

@@ -172,6 +172,10 @@ test('F-01/J-03 零运行时依赖：没有浮动依赖可漂移', () => {
 })
 
 test('J-02 分发包不携带本机绝对路径（源码目录检查）', () => {
+  // 模式由片段拼出：这个检查文件本身也不能含"本机路径"字样，否则会被它实现的扫描命中。
+  const users = ['U', 's', 'e', 'r', 's'].join('')
+  const winHome = new RegExp(`[A-Za-z]:\\\\{1,2}${users}\\\\`, 'i')
+  const posixHome = new RegExp(`/${users.toLowerCase()}/`, 'i')
   const offenders = []
   const scan = (dir) => {
     for (const name of readdirSync(dir, { withFileTypes: true })) {
@@ -184,7 +188,7 @@ test('J-02 分发包不携带本机绝对路径（源码目录检查）', () => 
       if (!/\.(js|mjs|json|yml|md|cmd|ps1)$/.test(name.name)) continue
       if (name.name === 'security.test.mjs') continue
       const text = readFileSync(path, 'utf8')
-      if (/C:\\\\Users\\\\[A-Za-z]/.test(text) || /\/Users\/[A-Za-z]/.test(text)) {
+      if (winHome.test(text) || posixHome.test(text)) {
         offenders.push(path.slice(root.length + 1))
       }
     }

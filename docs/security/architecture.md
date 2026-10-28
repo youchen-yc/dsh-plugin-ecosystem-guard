@@ -33,6 +33,20 @@
 - `arguments`（代调用参数）原样透传给目标工具，由目标工具自己的 schema 校验；本插件只做长度截断后展示。
 - 共享的裁剪函数：`sanitizeText()` 去控制字符（`\u0000-\u001f`）、折叠换行、截断到指定长度（`lib/doctor.js`）。
 
+### 新增资源类型/入口的登记流程（C-05）
+
+本插件把"权限点登记"落成代码里的**唯一白名单**，新增任何对外入口都必须先登记、再上线：
+
+| 步骤 | 要求 | 落地位置 |
+|---|---|---|
+| 1 | 新的 agent 工具 action 必须加入 `TOOL_ACTIONS`，否则 `isKnownAction` 判假、被默认拒绝 | `lib/policy.js` |
+| 2 | 新的 RPC 方法必须加入 `RPC_METHODS`；破坏性的还要加进 `RPC_REQUIRE_CONFIRMATION` | `lib/policy.js` |
+| 3 | 新增入口必须有"未知值被拒绝"的测试用例 | `test/security.test.mjs`（「A-03 默认拒绝」） |
+| 4 | 同步登记到信任边界表（数据、方向、身份转换、控制） | `docs/security/trust-boundary.md §2` |
+| 5 | 合并前在评审记录里留一行 | `docs/security/review-checklist.md §2` |
+
+未完成登记的入口在运行时**不可达**（白名单不含即拒绝），因此不存在"先上线后补权限点"的窗口。
+
 ## 4. 输出编码（E-02）
 
 | 输出通道 | 编码方式 |

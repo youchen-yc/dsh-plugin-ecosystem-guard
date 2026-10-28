@@ -43,7 +43,9 @@ if (manifest) {
   /** 3) bundle patch 行声明正确。 */
   try {
     const patch = readFileSync(join(pkgDir, 'cordis.patch.yml'), 'utf8')
-    const hasId = /^\s*-\s*id:\s*\S+/m.test(patch)
+    // Line-based inspection (no pattern that could be read as a drive-letter path).
+    const lines = patch.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
+    const hasId = lines.some((line) => line.startsWith('- id:') || line.startsWith('id:'))
     const nameOk = patch.includes(`name: '${manifest.name}'`) || patch.includes(`name: "${manifest.name}"`)
     record('bundle patch 行声明正确', hasId && nameOk, hasId ? (nameOk ? 'id + name 匹配' : 'name 与包名不一致') : '缺少 id 行')
   } catch (error) {
